@@ -1,0 +1,12 @@
+{
+  "name": "foody-market",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "install:all": "npm ci --prefix client && npm ci --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "build": "npm run build --prefix server && npm run build --prefix client",
+    "lint": "npm run lint --prefix client"
+  }
+}

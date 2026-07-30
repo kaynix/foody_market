@@ -6,7 +6,7 @@ export { default as ProductCard } from './components/ui/ProductCard';
 export { default as ProductGrid } from './components/ui/ProductGrid';
 
 // Hooks
-export { useCart } from './hooks/useCart';
+export { useCart } from './contexts/CartContext';
 export { useProductFilter } from './hooks/useProductFilter';
 
 // Types

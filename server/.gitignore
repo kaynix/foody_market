@@ -1,4 +1,5 @@
 node_modules/
 dist/
 .env
-public/images/
+public/images/*
+!public/images/.gitkeep

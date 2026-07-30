@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+}
+
+/* Reset default styles for the app */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Remove default body styles that conflict with Tailwind */
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Let Tailwind handle all styling */
+#root {
+  min-height: 100vh;
+}

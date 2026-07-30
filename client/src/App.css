@@ -1,0 +1,134 @@
+/* Reset and base styles for the shop */
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  min-height: 100vh;
+}
+
+/* Remove default body margins and padding */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Product card hover effects */
+.product-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Category menu items */
+.category-item {
+  transition: all 0.2s ease-in-out;
+  border-radius: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.category-item:hover {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  transform: translateX(4px);
+}
+
+/* Search input focus effect */
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Header shadow */
+.header-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Smooth scrolling for main content */
+.main-content {
+  scroll-behavior: smooth;
+}
+
+/* Product grid responsive adjustments */
+.product-grid {
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .product-grid {
+    gap: 1rem;
+  }
+}
+
+/* Price styling */
+.price {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+/* Button hover effects */
+.add-to-cart-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.add-to-cart-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Loading animation for images */
+.product-image {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Remove default link styles */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Accessibility improvements */
+.focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .navbar-center {
+    display: none;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    top: 64px;
+    left: -100%;
+    transition: left 0.3s ease-in-out;
+    z-index: 40;
+  }
+  
+  .sidebar.open {
+    left: 0;
+  }
+}

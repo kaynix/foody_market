@@ -40,5 +40,7 @@ npm run lint
 
 ## Current limitations
 
-The API currently uses in-memory mock data. Product and banner image files are
-not included yet; place them in `server/public/images/`.
+The API currently uses in-memory mock data.
+
+Product and banner images are stored in `server/public/images/`. See
+[`IMAGE_CREDITS.md`](IMAGE_CREDITS.md) for their sources and licenses.

@@ -3,6 +3,7 @@ import { and, asc, eq, inArray, lte, or } from 'drizzle-orm';
 import type { Database } from '../db/client';
 import { outboxAttempts, outboxEvents } from '../db/schema';
 import { PermanentChannelError } from './types';
+import { redactText } from '../security/redaction';
 
 export type OutboxEvent = typeof outboxEvents.$inferSelect;
 export type OutboxHandler = (event: OutboxEvent, idempotencyKey: string) => Promise<void>;
@@ -65,7 +66,7 @@ export class OutboxWorker {
       await handler(event, event.idempotencyKey);
       await this.finish(event.id, lockToken, attemptNumber, 'sent');
     } catch (error) {
-      const message = error instanceof Error ? error.message.slice(0, 1000) : 'Unknown outbox error';
+      const message = redactText(error);
       const cycleLimit = this.options.maxAttempts * (event.retryCycle + 1);
       const permanent = error instanceof PermanentChannelError || attemptNumber >= cycleLimit;
       await this.finish(

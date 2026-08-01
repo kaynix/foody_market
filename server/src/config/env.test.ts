@@ -18,6 +18,9 @@ describe('parseEnv', () => {
     expect(config.IDENTITY_STATE_TTL_MINUTES).toBe(10);
     expect(config.CHANNEL_LINK_TTL_MINUTES).toBe(15);
     expect(config.OUTBOX_BATCH_SIZE).toBe(20);
+    expect(config.TRACKING_TTL_DAYS).toBe(90);
+    expect(config.CLEANUP_INTERVAL_MINUTES).toBe(15);
+    expect(config.RATE_LIMIT_AUTH_MAX).toBe(30);
     expect(config.STORAGE_DRIVER).toBe('local');
     expect(config.DEV_IDENTITY_ENABLED).toBe(false);
   });

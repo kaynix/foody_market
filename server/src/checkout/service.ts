@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, isNull } from 'drizzle-orm';
 import { createOpaqueToken } from '../auth/tokens';
 import type { Database } from '../db/client';
 import {
@@ -41,6 +41,7 @@ export class CheckoutService {
     private readonly secret: string,
     private readonly encryptionKey: string,
     private readonly applications: ApplicationService,
+    private readonly trackingTtlDays = 90,
   ) {}
 
   validate(lines: CheckoutLineInput[]) {
@@ -89,6 +90,7 @@ export class CheckoutService {
         buyerChannelDestinationEncrypted: buyerChannel.destinationEncrypted,
         buyerChannelFingerprint: buyerChannel.destinationFingerprint,
         trackingTokenHash: hashSecret(trackingToken, this.secret),
+        trackingExpiresAt: new Date(Date.now() + this.trackingTtlDays * 24 * 60 * 60 * 1000),
       });
 
       const applicationIds: string[] = [];
@@ -145,6 +147,8 @@ export class CheckoutService {
     }).from(checkoutGroups).where(and(
       eq(checkoutGroups.id, groupId),
       eq(checkoutGroups.trackingTokenHash, hashSecret(trackingToken, this.secret)),
+      gte(checkoutGroups.trackingExpiresAt, new Date()),
+      isNull(checkoutGroups.trackingRevokedAt),
     )).limit(1);
     if (!group) throw new AppHttpError('Tracking group not found', 404, 'TRACKING_NOT_FOUND');
 
@@ -200,6 +204,8 @@ export class CheckoutService {
     const [group] = await this.db.select({ id: checkoutGroups.id }).from(checkoutGroups).where(and(
       eq(checkoutGroups.id, groupId),
       eq(checkoutGroups.trackingTokenHash, hashSecret(trackingToken, this.secret)),
+      gte(checkoutGroups.trackingExpiresAt, new Date()),
+      isNull(checkoutGroups.trackingRevokedAt),
     )).limit(1);
     if (!group) throw new AppHttpError('Tracking group not found', 404, 'TRACKING_NOT_FOUND');
     return this.applications.transitionBuyer(groupId, applicationId);

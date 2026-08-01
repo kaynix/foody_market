@@ -28,7 +28,7 @@ describe('marketplace database schema', () => {
        where table_schema = 'public'
          and table_name in (
            'sellers', 'products', 'checkout_groups',
-           'seller_applications', 'outbox_events'
+           'seller_applications', 'outbox_events', 'worker_heartbeats'
          )
        order by table_name`,
     );
@@ -39,6 +39,7 @@ describe('marketplace database schema', () => {
       'products',
       'seller_applications',
       'sellers',
+      'worker_heartbeats',
     ]);
   });
 

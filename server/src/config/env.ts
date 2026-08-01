@@ -27,12 +27,33 @@ const envSchema = z
     DEV_IDENTITY_ENABLED: booleanString,
     STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
     LOCAL_UPLOAD_DIR: z.string().trim().min(1).default('./var/uploads'),
+    S3_REGION: optionalString,
+    S3_BUCKET: optionalString,
+    S3_ENDPOINT: optionalString.pipe(z.url().optional()),
+    S3_PUBLIC_URL: optionalString.pipe(z.url().optional()),
+    S3_ACCESS_KEY_ID: optionalString,
+    S3_SECRET_ACCESS_KEY: optionalString,
+    S3_FORCE_PATH_STYLE: booleanString,
     TELEGRAM_BOT_TOKEN: optionalString,
     TELEGRAM_BOT_USERNAME: optionalString,
     TELEGRAM_WEBHOOK_SECRET: optionalString,
     OUTBOX_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(20),
     OUTBOX_LEASE_SECONDS: z.coerce.number().int().min(5).max(3600).default(60),
     OUTBOX_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(50).default(8),
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(0),
+    RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().min(1).max(60).default(15),
+    RATE_LIMIT_AUTH_MAX: z.coerce.number().int().min(1).max(10_000).default(30),
+    RATE_LIMIT_LINK_MAX: z.coerce.number().int().min(1).max(10_000).default(60),
+    RATE_LIMIT_UPLOAD_MAX: z.coerce.number().int().min(1).max(10_000).default(60),
+    RATE_LIMIT_CHECKOUT_MAX: z.coerce.number().int().min(1).max(10_000).default(30),
+    RATE_LIMIT_TRACKING_MAX: z.coerce.number().int().min(1).max(10_000).default(120),
+    RATE_LIMIT_ACTION_MAX: z.coerce.number().int().min(1).max(100_000).default(300),
+    TRACKING_TTL_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
+    CLEANUP_INTERVAL_MINUTES: z.coerce.number().int().min(1).max(1440).default(15),
+    SESSION_RETENTION_DAYS: z.coerce.number().int().min(0).max(3650).default(7),
+    LINK_INTENT_RETENTION_HOURS: z.coerce.number().int().min(0).max(8760).default(24),
+    ACTION_TOKEN_RETENTION_DAYS: z.coerce.number().int().min(0).max(3650).default(7),
+    WORKER_STALE_SECONDS: z.coerce.number().int().min(10).max(86400).default(120),
   })
   .superRefine((config, context) => {
     if (config.NODE_ENV === 'test' && !config.TEST_DATABASE_URL) {
@@ -65,6 +86,21 @@ const envSchema = z
           code: 'custom',
           path: ['PII_ENCRYPTION_KEY'],
           message: 'Development encryption key is not allowed in production',
+        });
+      }
+    }
+
+    if (config.STORAGE_DRIVER === 's3') {
+      for (const key of ['S3_REGION', 'S3_BUCKET', 'S3_PUBLIC_URL'] as const) {
+        if (!config[key]) {
+          context.addIssue({ code: 'custom', path: [key], message: `${key} is required for S3 storage` });
+        }
+      }
+      if (Boolean(config.S3_ACCESS_KEY_ID) !== Boolean(config.S3_SECRET_ACCESS_KEY)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['S3_ACCESS_KEY_ID'],
+          message: 'S3 access key and secret must be configured together',
         });
       }
     }

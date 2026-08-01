@@ -277,11 +277,16 @@ export const checkoutGroups = pgTable(
     buyerChannelDestinationEncrypted: text('buyer_channel_destination_encrypted').notNull(),
     buyerChannelFingerprint: text('buyer_channel_fingerprint').notNull(),
     trackingTokenHash: text('tracking_token_hash').notNull(),
+    trackingExpiresAt: timestamp('tracking_expires_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now() + interval '90 days'`),
+    trackingRevokedAt: timestamp('tracking_revoked_at', { withTimezone: true }),
     ...timestamps(),
   },
   (table) => [
     uniqueIndex('checkout_groups_tracking_token_uq').on(table.trackingTokenHash),
     index('checkout_groups_created_idx').on(table.createdAt),
+    index('checkout_groups_tracking_expiry_idx').on(table.trackingExpiresAt, table.trackingRevokedAt),
   ],
 );
 
@@ -414,6 +419,12 @@ export const auditEvents = pgTable(
   (table) => [index('audit_events_aggregate_idx').on(table.aggregateType, table.aggregateId)],
 );
 
+export const workerHeartbeats = pgTable('worker_heartbeats', {
+  workerName: text('worker_name').primaryKey(),
+  lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
+});
+
 export const schema = {
   sellers,
   sellerSessions,
@@ -432,4 +443,5 @@ export const schema = {
   outboxEvents,
   outboxAttempts,
   auditEvents,
+  workerHeartbeats,
 };

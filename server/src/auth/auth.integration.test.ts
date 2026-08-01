@@ -41,8 +41,27 @@ describe('seller authentication HTTP flow', () => {
     await database.pool.end();
   });
 
+  it('reports liveness and database-backed readiness independently of Telegram', async () => {
+    const health = await request(app).get('/health').expect(200);
+    expect(health.body).toMatchObject({ status: 'ok', service: 'hutorynok-api' });
+
+    const readiness = await request(app).get('/ready').expect(200);
+    expect(readiness.body).toMatchObject({
+      status: 'ready',
+      dependencies: {
+        postgresql: 'ready',
+        storage: { status: 'configured', driver: 'local' },
+      },
+    });
+    expect(readiness.body.note).toContain('does not gate API readiness');
+  });
+
   it('advertises development identity and keeps the unconfigured Diia slot unavailable', async () => {
     const response = await request(app).get('/api/auth/providers').expect(200);
+
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['content-security-policy']).toContain("default-src 'none'");
+    expect(response.headers['ratelimit-policy']).toBeDefined();
 
     expect(response.body.providers).toEqual(
       expect.arrayContaining([

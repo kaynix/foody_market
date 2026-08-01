@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import helmet from 'helmet';
 
 import { createAuthRouter } from './auth/routes';
 import { createIdentityProviderRegistry } from './auth/registry';
@@ -29,8 +30,11 @@ import { CheckoutService } from './checkout/service';
 import { createCheckoutRouter, createTrackingRouter } from './checkout/routes';
 import { ApplicationService } from './applications/service';
 import { createSellerApplicationRouter } from './applications/routes';
+import { createRateLimiters } from './middleware/rateLimits';
+import { createHealthRouter } from './maintenance/healthRoutes';
 
 const app = express();
+app.set('trust proxy', env.TRUST_PROXY_HOPS);
 const sellerSessionService = new SellerSessionService(database.db, {
   secret: env.SESSION_SECRET,
   ttlHours: env.SESSION_TTL_HOURS,
@@ -65,9 +69,23 @@ const checkoutService = new CheckoutService(
   env.SESSION_SECRET,
   env.PII_ENCRYPTION_KEY,
   applicationService,
+  env.TRACKING_TTL_DAYS,
 );
+const rateLimits = createRateLimiters(env);
 
 // ── Middleware ──────────────────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'none'"],
+      baseUri: ["'none'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'none'"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  strictTransportSecurity: env.NODE_ENV === 'production' ? undefined : false,
+}));
 app.use(
   cors({
     origin: env.FRONTEND_URL,
@@ -87,20 +105,21 @@ if (env.STORAGE_DRIVER === 'local') {
   }));
 }
 
-// ── Health check ────────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => {
-  res.json({ success: true, message: 'Foody API is running', timestamp: new Date().toISOString() });
-});
+// ── Health and readiness ───────────────────────────────────────────────────
+app.use(createHealthRouter(env, database.db, database.pool));
 
 // ── Routes ──────────────────────────────────────────────────────────────────
 app.use('/api/products', createProductRouter(catalogService));
 app.use('/api/categories', createCategoryRouter(catalogService));
 app.use('/api/banners', bannerRoutes);
+app.use('/api/messaging/link-intents', rateLimits.link);
+app.use('/api/messaging/telegram/webhook', rateLimits.action);
 app.use('/api/messaging', createPublicMessagingRouter(env, messagingRegistry, messagingUpdates));
-app.use('/api/checkout', createCheckoutRouter(checkoutService));
-app.use('/api/tracking', createTrackingRouter(checkoutService));
+app.use('/api/checkout', rateLimits.checkout, createCheckoutRouter(checkoutService));
+app.use('/api/tracking', rateLimits.tracking, createTrackingRouter(checkoutService));
 app.use(
   '/api/auth',
+  rateLimits.auth,
   createAuthRouter({
     config: env,
     registry: createIdentityProviderRegistry(env),
@@ -109,14 +128,17 @@ app.use(
 );
 app.use(
   '/api/seller/products',
+  rateLimits.upload,
   createSellerProductRouter(env, sellerSessionService, sellerProductService),
 );
 app.use(
   '/api/seller/channels',
+  rateLimits.sellerLink,
   createSellerChannelRouter(env, sellerSessionService, messagingRegistry, channelLinks),
 );
 app.use(
   '/api/seller/applications',
+  rateLimits.sellerAction,
   createSellerApplicationRouter(env, sellerSessionService, applicationService),
 );
 app.use(

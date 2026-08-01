@@ -6,6 +6,8 @@ import { registerOutboxHandlers } from '../messaging/outboxHandlers';
 import { OutboxWorker } from '../messaging/outboxWorker';
 import { createMessagingRegistry } from '../messaging/registry';
 import { createFileStorage } from '../storage/registry';
+import { HeartbeatService } from '../maintenance/heartbeatService';
+import { safeErrorForLog } from '../security/redaction';
 
 const registry = createMessagingRegistry(env);
 const actions = new ChannelActionTokenService(database.db, env.SESSION_SECRET);
@@ -20,6 +22,7 @@ const worker = registerOutboxHandlers(
   createFileStorage(env),
   notifications,
 );
+const heartbeat = new HeartbeatService(database.db, 'outbox');
 
 let stopping = false;
 const stop = () => { stopping = true; };
@@ -30,9 +33,10 @@ async function run() {
   while (!stopping) {
     try {
       const processed = await worker.runBatch();
+      await heartbeat.beat({ processed });
       if (processed === 0) await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error('Outbox batch failed:', error);
+      console.error('Outbox batch failed:', safeErrorForLog(error));
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
@@ -40,6 +44,6 @@ async function run() {
 }
 
 run().catch((error) => {
-  console.error('Outbox worker stopped:', error);
+  console.error('Outbox worker stopped:', safeErrorForLog(error));
   process.exitCode = 1;
 });

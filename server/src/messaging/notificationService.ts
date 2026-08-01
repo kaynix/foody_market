@@ -35,7 +35,11 @@ export class ChannelNotificationService {
       .where(eq(sellerApplications.id, applicationId)).limit(1);
     if (!application) throw new AppHttpError('Application not found', 404, 'APPLICATION_NOT_FOUND');
 
-    if (eventType === 'application.created' || eventType === 'application.cancelled_by_buyer') {
+    if (
+      eventType === 'application.created'
+      || eventType === 'application.cancelled_by_buyer'
+      || eventType === 'application.seller_status_changed'
+    ) {
       const [connection] = await this.db.select().from(channelConnections).where(and(
         eq(channelConnections.sellerId, application.sellerId),
         eq(channelConnections.active, true),
@@ -46,6 +50,18 @@ export class ChannelNotificationService {
         await this.registry.require(connection.provider).send(
           decryptString(connection.destinationEncrypted, this.encryptionKey),
           { text: `Покупець скасував заявку для «${application.storeName}» на ${money(application.amountKopecks)}.` },
+          idempotencyKey,
+        );
+        return;
+      }
+      if (eventType === 'application.seller_status_changed') {
+        const statusLabels = {
+          accepted: 'прийнята', rejected: 'відхилена', completed: 'виконана',
+          new: 'нова', cancelled: 'скасована',
+        } as const;
+        await this.registry.require(connection.provider).send(
+          decryptString(connection.destinationEncrypted, this.encryptionKey),
+          { text: `Заявка для «${application.storeName}» тепер ${statusLabels[application.status]}.` },
           idempotencyKey,
         );
         return;

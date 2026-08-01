@@ -37,6 +37,7 @@ export function registerOutboxHandlers(
     'application.cancelled',
     'application.completed',
     'application.cancelled_by_buyer',
+    'application.seller_status_changed',
   ]) {
     worker.register(eventType, (event, key) => notifications.sendApplicationEvent(event.aggregateId, eventType, key));
   }

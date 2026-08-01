@@ -3,11 +3,21 @@ import { AppHttpError } from '../http/errors';
 import type { ChannelLinkIntentService } from './linkIntentService';
 import type { MessagingChannelRegistry } from './registry';
 
+export interface ChannelActionExecutor {
+  executeChannelAction(input: {
+    sellerId: string;
+    aggregateType: string;
+    aggregateId: string;
+    action: string;
+  }): Promise<{ status: string; changed: boolean }>;
+}
+
 export class MessagingUpdateService {
   constructor(
     private readonly registry: MessagingChannelRegistry,
     private readonly links: ChannelLinkIntentService,
     private readonly actions: ChannelActionTokenService,
+    private readonly actionExecutor?: ChannelActionExecutor,
   ) {}
 
   createBuyerIntent(provider: string) {
@@ -45,12 +55,28 @@ export class MessagingUpdateService {
       if (decoded.callbackId) await adapter.acknowledgeAction?.(decoded.callbackId, 'Дія недійсна або застаріла');
       return { handled: true as const, kind: decoded.kind, valid: false as const };
     }
+    let result: { status: string; changed: boolean } | undefined;
+    try {
+      result = await this.actionExecutor?.executeChannelAction({
+        sellerId: action.sellerId,
+        aggregateType: action.aggregateType,
+        aggregateId: action.aggregateId,
+        action: action.action,
+      });
+    } catch (error) {
+      if (!(error instanceof AppHttpError)) throw error;
+      if (decoded.callbackId) await adapter.acknowledgeAction?.(
+        decoded.callbackId,
+        error.code === 'APPLICATION_TRANSITION_INVALID' ? 'Статус уже змінився' : 'Дію не виконано',
+      );
+      return { handled: true as const, kind: decoded.kind, valid: false as const };
+    }
     if (decoded.callbackId) {
       await adapter.acknowledgeAction?.(
         decoded.callbackId,
-        action.alreadyConsumed ? 'Дію вже оброблено' : 'Дію прийнято',
+        result ? `Статус: ${result.status}` : action.alreadyConsumed ? 'Дію вже оброблено' : 'Дію прийнято',
       );
     }
-    return { handled: true as const, kind: decoded.kind, valid: true as const, action };
+    return { handled: true as const, kind: decoded.kind, valid: true as const, action, result };
   }
 }

@@ -363,6 +363,7 @@ export const outboxEvents = pgTable(
     idempotencyKey: text('idempotency_key').notNull(),
     state: outboxStateEnum('state').notNull().default('pending'),
     attemptCount: integer('attempt_count').notNull().default(0),
+    retryCycle: integer('retry_cycle').notNull().default(0),
     availableAt: timestamp('available_at', { withTimezone: true }).notNull().defaultNow(),
     lockedUntil: timestamp('locked_until', { withTimezone: true }),
     lockToken: text('lock_token'),
@@ -373,6 +374,7 @@ export const outboxEvents = pgTable(
     uniqueIndex('outbox_events_idempotency_uq').on(table.idempotencyKey),
     index('outbox_events_claim_idx').on(table.state, table.availableAt, table.lockedUntil),
     check('outbox_events_attempt_count_nonnegative', sql`${table.attemptCount} >= 0`),
+    check('outbox_events_retry_cycle_nonnegative', sql`${table.retryCycle} >= 0`),
   ],
 );
 

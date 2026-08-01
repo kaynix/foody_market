@@ -15,6 +15,7 @@ function DashboardContent() {
           <Link href="/seller/settings" className="btn btn-primary">Налаштування магазину</Link>
           <Link href="/seller/products" className="btn btn-outline">Керувати товарами</Link>
           <Link href="/seller/channels" className="btn btn-outline">Підключити messenger</Link>
+          <Link href="/seller/applications" className="btn btn-outline">Переглянути заявки</Link>
           {seller ? <Link href={`/store/${seller.slug}`} className="btn btn-outline">Переглянути публічну сторінку</Link> : null}
         </div>
       </main>

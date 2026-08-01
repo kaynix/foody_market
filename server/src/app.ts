@@ -27,6 +27,8 @@ import { createPublicMessagingRouter, createSellerChannelRouter } from './messag
 import { MessagingUpdateService } from './messaging/updateService';
 import { CheckoutService } from './checkout/service';
 import { createCheckoutRouter, createTrackingRouter } from './checkout/routes';
+import { ApplicationService } from './applications/service';
+import { createSellerApplicationRouter } from './applications/routes';
 
 const app = express();
 const sellerSessionService = new SellerSessionService(database.db, {
@@ -53,12 +55,16 @@ const channelLinks = new ChannelLinkIntentService(
   env.CHANNEL_LINK_TTL_MINUTES,
 );
 const channelActions = new ChannelActionTokenService(database.db, env.SESSION_SECRET);
-const messagingUpdates = new MessagingUpdateService(messagingRegistry, channelLinks, channelActions);
+const applicationService = new ApplicationService(database.db, env.PII_ENCRYPTION_KEY);
+const messagingUpdates = new MessagingUpdateService(
+  messagingRegistry, channelLinks, channelActions, applicationService,
+);
 const checkoutService = new CheckoutService(
   database.db,
   channelLinks,
   env.SESSION_SECRET,
   env.PII_ENCRYPTION_KEY,
+  applicationService,
 );
 
 // ── Middleware ──────────────────────────────────────────────────────────────
@@ -108,6 +114,10 @@ app.use(
 app.use(
   '/api/seller/channels',
   createSellerChannelRouter(env, sellerSessionService, messagingRegistry, channelLinks),
+);
+app.use(
+  '/api/seller/applications',
+  createSellerApplicationRouter(env, sellerSessionService, applicationService),
 );
 app.use(
   '/api/seller',

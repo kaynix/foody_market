@@ -17,6 +17,7 @@ import {
 } from '../db/schema';
 import { AppHttpError } from '../http/errors';
 import type { ChannelLinkIntentService } from '../messaging/linkIntentService';
+import type { ApplicationService } from '../applications/service';
 import { decryptString, encryptString, hashSecret } from '../security/crypto';
 import type { CheckoutCreateInput, CheckoutLineInput } from './validation';
 
@@ -39,6 +40,7 @@ export class CheckoutService {
     private readonly links: ChannelLinkIntentService,
     private readonly secret: string,
     private readonly encryptionKey: string,
+    private readonly applications: ApplicationService,
   ) {}
 
   validate(lines: CheckoutLineInput[]) {
@@ -195,37 +197,12 @@ export class CheckoutService {
   }
 
   async cancel(groupId: string, applicationId: string, trackingToken: string) {
-    return this.db.transaction(async (transaction) => {
-      const [group] = await transaction.select({ id: checkoutGroups.id }).from(checkoutGroups).where(and(
-        eq(checkoutGroups.id, groupId),
-        eq(checkoutGroups.trackingTokenHash, hashSecret(trackingToken, this.secret)),
-      )).for('update').limit(1);
-      if (!group) throw new AppHttpError('Tracking group not found', 404, 'TRACKING_NOT_FOUND');
-      const [current] = await transaction.select().from(sellerApplications).where(and(
-        eq(sellerApplications.id, applicationId),
-        eq(sellerApplications.checkoutGroupId, groupId),
-      )).for('update').limit(1);
-      if (!current) throw new AppHttpError('Application not found', 404, 'APPLICATION_NOT_FOUND');
-      if (current.status === 'cancelled') return { id: current.id, status: current.status };
-      if (current.status !== 'new') {
-        throw new AppHttpError('Application can no longer be cancelled', 409, 'APPLICATION_TRANSITION_INVALID');
-      }
-      const [updated] = await transaction.update(sellerApplications)
-        .set({ status: 'cancelled', updatedAt: new Date() })
-        .where(and(eq(sellerApplications.id, applicationId), eq(sellerApplications.status, 'new')))
-        .returning({ id: sellerApplications.id, status: sellerApplications.status });
-      if (!updated) throw new AppHttpError('Application changed concurrently', 409, 'APPLICATION_TRANSITION_CONFLICT');
-      await transaction.insert(auditEvents).values({
-        actorKind: 'buyer', actorId: null, aggregateType: 'application',
-        aggregateId: applicationId, action: 'application.cancelled', metadata: {},
-      });
-      await transaction.insert(outboxEvents).values({
-        aggregateType: 'application', aggregateId: applicationId,
-        eventType: 'application.cancelled_by_buyer',
-        idempotencyKey: `application:${applicationId}:cancelled:seller`,
-      });
-      return updated;
-    });
+    const [group] = await this.db.select({ id: checkoutGroups.id }).from(checkoutGroups).where(and(
+      eq(checkoutGroups.id, groupId),
+      eq(checkoutGroups.trackingTokenHash, hashSecret(trackingToken, this.secret)),
+    )).limit(1);
+    if (!group) throw new AppHttpError('Tracking group not found', 404, 'TRACKING_NOT_FOUND');
+    return this.applications.transitionBuyer(groupId, applicationId);
   }
 
   private async buildPreflight(

@@ -22,6 +22,7 @@ import { ChannelLinkIntentService } from '../messaging/linkIntentService';
 import { MessagingChannelRegistry } from '../messaging/registry';
 import type { MessagingChannelAdapter } from '../messaging/types';
 import { CheckoutService } from './service';
+import { ApplicationService } from '../applications/service';
 
 const database = createDatabase(env.TEST_DATABASE_URL!);
 const provider = `checkout-test-${crypto.randomUUID()}`;
@@ -35,7 +36,10 @@ const links = new ChannelLinkIntentService(
   database.db, new MessagingChannelRegistry([adapter]),
   env.SESSION_SECRET, env.PII_ENCRYPTION_KEY, 15,
 );
-const service = new CheckoutService(database.db, links, env.SESSION_SECRET, env.PII_ENCRYPTION_KEY);
+const applications = new ApplicationService(database.db, env.PII_ENCRYPTION_KEY);
+const service = new CheckoutService(
+  database.db, links, env.SESSION_SECRET, env.PII_ENCRYPTION_KEY, applications,
+);
 const sellerIds: string[] = [];
 const productIds: string[] = [];
 const groupIds: string[] = [];

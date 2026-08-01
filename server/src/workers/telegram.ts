@@ -5,6 +5,7 @@ import { ChannelActionTokenService } from '../messaging/actionTokenService';
 import { ChannelLinkIntentService } from '../messaging/linkIntentService';
 import { createMessagingRegistry } from '../messaging/registry';
 import { MessagingUpdateService } from '../messaging/updateService';
+import { ApplicationService } from '../applications/service';
 
 if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_BOT_USERNAME) {
   throw new Error('TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME are required for polling');
@@ -22,7 +23,8 @@ const links = new ChannelLinkIntentService(
   env.CHANNEL_LINK_TTL_MINUTES,
 );
 const actions = new ChannelActionTokenService(database.db, env.SESSION_SECRET);
-const updates = new MessagingUpdateService(registry, links, actions);
+const applications = new ApplicationService(database.db, env.PII_ENCRYPTION_KEY);
+const updates = new MessagingUpdateService(registry, links, actions, applications);
 const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
 
 bot.on('message', (context) => updates.handle('telegram', context.update));

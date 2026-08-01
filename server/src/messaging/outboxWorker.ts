@@ -66,7 +66,8 @@ export class OutboxWorker {
       await this.finish(event.id, lockToken, attemptNumber, 'sent');
     } catch (error) {
       const message = error instanceof Error ? error.message.slice(0, 1000) : 'Unknown outbox error';
-      const permanent = error instanceof PermanentChannelError || attemptNumber >= this.options.maxAttempts;
+      const cycleLimit = this.options.maxAttempts * (event.retryCycle + 1);
+      const permanent = error instanceof PermanentChannelError || attemptNumber >= cycleLimit;
       await this.finish(
         event.id,
         lockToken,

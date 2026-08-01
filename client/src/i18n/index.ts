@@ -91,7 +91,9 @@ const resources = {
       lightMode: "light mode",
       
       // Alerts
-      addedToCart: "Added {{quantity}} {{name}}(s) to cart!"
+      addedToCart: "Added {{quantity}} {{name}}(s) to cart!",
+      reportProduct: "Report product",
+      complaintComingSoon: "Reporting will be available later"
     }
   },
   ua: {
@@ -182,7 +184,9 @@ const resources = {
       lightMode: "світлий режим",
       
       // Alerts
-      addedToCart: "Додано {{quantity}} {{name}} до кошика!"
+      addedToCart: "Додано {{quantity}} {{name}} до кошика!",
+      reportProduct: "Поскаржитися",
+      complaintComingSoon: "Функція з’явиться пізніше"
     }
   },
   de: {
@@ -273,7 +277,9 @@ const resources = {
       lightMode: "Heller Modus",
       
       // Alerts
-      addedToCart: "{{quantity}} {{name}} zum Warenkorb hinzugefügt!"
+      addedToCart: "{{quantity}} {{name}} zum Warenkorb hinzugefügt!",
+      reportProduct: "Produkt melden",
+      complaintComingSoon: "Diese Funktion kommt später"
     }
   }
 };

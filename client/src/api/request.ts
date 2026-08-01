@@ -31,14 +31,16 @@ export async function requestJson<T>(
   path: string,
   init?: RequestInit & { csrf?: boolean },
 ): Promise<T> {
-  const csrfToken = init?.csrf ? readCookie('hutorynok_csrf') : undefined;
+  const { csrf, ...requestInit } = init ?? {};
+  const csrfToken = csrf ? readCookie('hutorynok_csrf') : undefined;
+  const isFormData = requestInit.body instanceof FormData;
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
+    ...requestInit,
     credentials: 'include',
     headers: {
-      'content-type': 'application/json',
+      ...(isFormData ? {} : { 'content-type': 'application/json' }),
       ...(csrfToken ? { 'x-csrf-token': csrfToken } : {}),
-      ...init?.headers,
+      ...requestInit.headers,
     },
   });
 

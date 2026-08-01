@@ -13,6 +13,7 @@ function DashboardContent() {
         <p className="text-base-content/65">Профіль магазину готовий. Керування товарами та заявками буде додано наступними етапами.</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/seller/settings" className="btn btn-primary">Налаштування магазину</Link>
+          <Link href="/seller/products" className="btn btn-outline">Керувати товарами</Link>
           {seller ? <Link href={`/store/${seller.slug}`} className="btn btn-outline">Переглянути публічну сторінку</Link> : null}
         </div>
       </main>

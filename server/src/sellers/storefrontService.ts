@@ -8,9 +8,15 @@ import {
   sellers,
 } from '../db/schema';
 import { AppHttpError } from '../http/errors';
+import type { FileStorageAdapter } from '../storage/types';
+import { publicImageUrls } from '../catalog/presenters';
 
 export class StorefrontService {
-  constructor(private readonly db: Database) {}
+  constructor(
+    private readonly db: Database,
+    private readonly storage: FileStorageAdapter,
+    private readonly publicApiUrl: string,
+  ) {}
 
   async getPublicStorefront(slug: string) {
     const [seller] = await this.db
@@ -102,9 +108,11 @@ export class StorefrontService {
       deliveryOptions,
       products: productRows.map((product) => ({
         ...product,
-        images: (imagesByProduct.get(product.id) ?? []).map(
-          ({ productId: _productId, ...image }) => image,
-        ),
+        images: (imagesByProduct.get(product.id) ?? []).map((image) => ({
+          altText: image.altText,
+          sortOrder: image.sortOrder,
+          ...publicImageUrls(image.storageKey, this.storage, this.publicApiUrl),
+        })),
       })),
     };
   }

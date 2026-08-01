@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
+import { formatUah } from '../utils/money';
 import { useCart } from '../contexts/CartContext';
 import { getTranslatedCategoryName } from '../utils/categoryUtils';
 
@@ -57,14 +58,7 @@ const CartPage: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     {/* Product Image */}
                     <div className="w-20 h-20 flex-shrink-0">
-                      <img 
-                        src={item.product.image} 
-                        alt={item.product.name}
-                        className="w-full h-full object-cover rounded-lg"
-                        onError={(e) => {
-                          e.currentTarget.src = 'http://localhost:3001/images/product-1-s.jpg';
-                        }}
-                      />
+                      {item.product.image ? <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover rounded-lg" /> : <div className="grid h-full w-full place-items-center rounded-lg bg-base-200 text-xs">Без фото</div>}
                     </div>
 
                     {/* Product Details */}
@@ -77,7 +71,7 @@ const CartPage: React.FC = () => {
                       <p className="text-sm text-base-content/60">
                         {getTranslatedCategoryName(item.product.categoryId, t)}
                       </p>
-                      <p className="text-lg font-bold text-primary">${item.product.price}</p>
+                      <p className="text-lg font-bold text-primary">{formatUah(item.product.priceKopecks)}</p>
                     </div>
 
                     {/* Quantity Controls */}
@@ -100,7 +94,7 @@ const CartPage: React.FC = () => {
                     {/* Item Total */}
                     <div className="text-right">
                       <p className="text-lg font-bold text-base-content">
-                        ₴{(item.product.price * item.quantity).toFixed(2)}
+                        {formatUah(item.product.priceKopecks * item.quantity)}
                       </p>
                       <button 
                         className="btn btn-sm btn-ghost text-error"

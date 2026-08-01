@@ -21,6 +21,9 @@ export default function SellerPortalLayout({ children }: { children: ReactNode }
             <Link href="/seller/settings" className="hidden text-sm text-white/75 hover:text-white md:inline">
               Налаштування
             </Link>
+            <Link href="/seller/products" className="hidden text-sm text-white/75 hover:text-white md:inline">
+              Товари
+            </Link>
             <button className="btn btn-sm border-white/20 bg-white/10 text-white" onClick={signOut}>
               Вийти
             </button>

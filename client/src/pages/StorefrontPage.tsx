@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useRoute } from 'wouter';
-import { API_BASE_URL } from '../api/request';
 import { fetchStorefront, type PublicStorefront } from '../api/sellers';
 
 function contactHref(type: string, value: string): string | undefined {
@@ -47,7 +46,7 @@ export default function StorefrontPage() {
 
       <section className="public-storefront__products">
         <div className="public-storefront__section-heading"><p className="seller-kicker">Вітрина</p><h2>Товари продавця</h2><span>{storefront.products.length}</span></div>
-        {storefront.products.length ? <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">{storefront.products.map((product) => { const image = product.images[0]; const imageUrl = image?.storageKey.startsWith('/') ? `${API_BASE_URL}${image.storageKey}` : image?.storageKey; return <article className="public-storefront__product" key={product.id}>{imageUrl ? <img src={imageUrl} alt={image?.altText || product.name} /> : <div className="public-storefront__image-placeholder">Фото готується</div>}<div><h3>{product.name}</h3><p>{product.description}</p><strong>{(product.priceKopecks / 100).toLocaleString('uk-UA', { style: 'currency', currency: 'UAH' })}</strong></div></article>; })}</div> : <div className="public-storefront__empty">Продавець ще не опублікував товари.</div>}
+        {storefront.products.length ? <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">{storefront.products.map((product) => { const image = product.images[0]; return <article className="public-storefront__product" key={product.id}>{image ? <img src={image.mediumUrl} alt={image.altText || product.name} /> : <div className="public-storefront__image-placeholder">Фото готується</div>}<div><h3>{product.name}</h3><p>{product.description}</p><strong>{(product.priceKopecks / 100).toLocaleString('uk-UA', { style: 'currency', currency: 'UAH' })}</strong></div></article>; })}</div> : <div className="public-storefront__empty">Продавець ще не опублікував товари.</div>}
       </section>
     </div>
   );

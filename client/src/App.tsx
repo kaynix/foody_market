@@ -10,6 +10,8 @@ import SellerDashboardPage from './pages/seller/SellerDashboardPage'
 import SellerOnboardingPage from './pages/seller/SellerOnboardingPage'
 import SellerSignInPage from './pages/seller/SellerSignInPage'
 import SellerSettingsPage from './pages/seller/SellerSettingsPage'
+import SellerProductsPage from './pages/seller/SellerProductsPage'
+import SellerProductEditorPage from './pages/seller/SellerProductEditorPage'
 import StorefrontPage from './pages/StorefrontPage'
 import { ThemeProvider } from './hooks/useTheme'
 
@@ -21,6 +23,9 @@ function App() {
         <Route path="/seller/sign-in" component={SellerSignInPage} />
         <Route path="/seller/onboarding" component={SellerOnboardingPage} />
         <Route path="/seller/settings" component={SellerSettingsPage} />
+        <Route path="/seller/products/new" component={SellerProductEditorPage} />
+        <Route path="/seller/products/:id/edit" component={SellerProductEditorPage} />
+        <Route path="/seller/products" component={SellerProductsPage} />
         <Route path="/seller" component={SellerDashboardPage} />
         <Route>
           <Layout>

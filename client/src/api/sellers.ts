@@ -52,7 +52,13 @@ export interface PublicStorefront {
     priceKopecks: number;
     unit: string;
     minimumQuantity: number;
-    images: Array<{ storageKey: string; altText: string; sortOrder: number }>;
+    images: Array<{
+      altText: string;
+      sortOrder: number;
+      thumbnailUrl: string;
+      mediumUrl: string;
+      largeUrl: string;
+    }>;
   }>;
 }
 

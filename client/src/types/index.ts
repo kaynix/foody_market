@@ -1,10 +1,26 @@
 export interface Product {
-  id: number;
+  id: string;
+  seller: {
+    id: string;
+    slug: string;
+    storeName: string;
+  };
   name: string;
-  price: number;
+  priceKopecks: number;
   categoryId: number;
-  image: string;
+  image: string | null;
+  images: Array<{
+    id: string;
+    altText: string;
+    sortOrder: number;
+    thumbnailUrl: string;
+    mediumUrl: string;
+    largeUrl: string;
+  }>;
   description: string;
+  unit: string;
+  minimumQuantity: number;
+  acceptingApplications: boolean;
 }
 
 export interface BannerAd {

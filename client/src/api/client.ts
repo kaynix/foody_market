@@ -42,8 +42,8 @@ async function apiFetch<T>(path: string): Promise<ApiResponse<T>> {
 export interface ProductQueryParams {
   categoryId?: number;
   search?: string;
-  minPrice?: number;
-  maxPrice?: number;
+  minPriceKopecks?: number;
+  maxPriceKopecks?: number;
   sortBy?: 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 }
 
@@ -51,8 +51,8 @@ export async function fetchProducts(params?: ProductQueryParams): Promise<{ data
   const qs = new URLSearchParams();
   if (params?.categoryId !== undefined) qs.set('categoryId', String(params.categoryId));
   if (params?.search)                   qs.set('search', params.search);
-  if (params?.minPrice !== undefined)   qs.set('minPrice', String(params.minPrice));
-  if (params?.maxPrice !== undefined)   qs.set('maxPrice', String(params.maxPrice));
+  if (params?.minPriceKopecks !== undefined) qs.set('minPriceKopecks', String(params.minPriceKopecks));
+  if (params?.maxPriceKopecks !== undefined) qs.set('maxPriceKopecks', String(params.maxPriceKopecks));
   if (params?.sortBy)                   qs.set('sortBy', params.sortBy);
 
   const query = qs.toString() ? `?${qs.toString()}` : '';
@@ -60,7 +60,7 @@ export async function fetchProducts(params?: ProductQueryParams): Promise<{ data
   return { data: res.data, total: res.total ?? res.data.length };
 }
 
-export async function fetchProduct(id: number): Promise<Product> {
+export async function fetchProduct(id: string): Promise<Product> {
   const res = await apiFetch<Product>(`/api/products/${id}`);
   return res.data;
 }

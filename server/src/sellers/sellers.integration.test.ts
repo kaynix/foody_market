@@ -15,6 +15,7 @@ import { errorHandler } from '../middleware/errorHandler';
 import { createSellerRouter, createStorefrontRouter } from './routes';
 import { SellerProfileService } from './service';
 import { StorefrontService } from './storefrontService';
+import type { FileStorageAdapter } from '../storage/types';
 
 const testDatabase = createDatabase(env.TEST_DATABASE_URL!);
 const sessionService = new SellerSessionService(testDatabase.db, {
@@ -22,7 +23,16 @@ const sessionService = new SellerSessionService(testDatabase.db, {
   ttlHours: 1,
 });
 const profileService = new SellerProfileService(testDatabase.db);
-const storefrontService = new StorefrontService(testDatabase.db);
+const testStorage: FileStorageAdapter = {
+  async put() {},
+  async delete() {},
+  getPublicUrl: (key) => `http://storage.test/${key}`,
+};
+const storefrontService = new StorefrontService(
+  testDatabase.db,
+  testStorage,
+  'http://localhost:3001',
+);
 const testApp = express();
 testApp.use(express.json());
 testApp.use(cookieParser());

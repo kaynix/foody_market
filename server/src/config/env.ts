@@ -22,12 +22,17 @@ const envSchema = z
     SESSION_SECRET: z.string().min(32),
     SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(8760).default(720),
     IDENTITY_STATE_TTL_MINUTES: z.coerce.number().int().min(1).max(60).default(10),
+    CHANNEL_LINK_TTL_MINUTES: z.coerce.number().int().min(1).max(60).default(15),
     PII_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/),
     DEV_IDENTITY_ENABLED: booleanString,
     STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
     LOCAL_UPLOAD_DIR: z.string().trim().min(1).default('./var/uploads'),
     TELEGRAM_BOT_TOKEN: optionalString,
     TELEGRAM_BOT_USERNAME: optionalString,
+    TELEGRAM_WEBHOOK_SECRET: optionalString,
+    OUTBOX_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(20),
+    OUTBOX_LEASE_SECONDS: z.coerce.number().int().min(5).max(3600).default(60),
+    OUTBOX_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(50).default(8),
   })
   .superRefine((config, context) => {
     if (config.NODE_ENV === 'test' && !config.TEST_DATABASE_URL) {
@@ -71,6 +76,13 @@ const envSchema = z
         code: 'custom',
         path: ['TELEGRAM_BOT_TOKEN'],
         message: 'Telegram token and username must be configured together',
+      });
+    }
+    if (config.NODE_ENV === 'production' && hasTelegramToken && !config.TELEGRAM_WEBHOOK_SECRET) {
+      context.addIssue({
+        code: 'custom',
+        path: ['TELEGRAM_WEBHOOK_SECRET'],
+        message: 'Telegram webhook secret is required in production',
       });
     }
   });

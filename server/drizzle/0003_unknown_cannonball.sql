@@ -1,0 +1,2 @@
+ALTER TABLE "channel_action_tokens" ADD COLUMN "idempotency_key" text NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "channel_action_tokens_idempotency_uq" ON "channel_action_tokens" USING btree ("idempotency_key");

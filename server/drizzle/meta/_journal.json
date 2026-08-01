@@ -8,6 +8,27 @@
       "when": 1785586023806,
       "tag": "0000_right_nekra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785593595735,
+      "tag": "0001_fair_overlord",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785593878493,
+      "tag": "0002_lazy_raider",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785594224783,
+      "tag": "0003_unknown_cannonball",
+      "breakpoints": true
     }
   ]
 }

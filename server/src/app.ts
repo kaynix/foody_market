@@ -20,6 +20,11 @@ import bannerRoutes from './routes/banners';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { ProductImageProcessor } from './storage/images';
 import { createFileStorage } from './storage/registry';
+import { ChannelActionTokenService } from './messaging/actionTokenService';
+import { ChannelLinkIntentService } from './messaging/linkIntentService';
+import { createMessagingRegistry } from './messaging/registry';
+import { createPublicMessagingRouter, createSellerChannelRouter } from './messaging/routes';
+import { MessagingUpdateService } from './messaging/updateService';
 
 const app = express();
 const sellerSessionService = new SellerSessionService(database.db, {
@@ -37,6 +42,16 @@ const sellerProductService = new SellerProductService(
   imageProcessor,
   env.PUBLIC_API_URL,
 );
+const messagingRegistry = createMessagingRegistry(env);
+const channelLinks = new ChannelLinkIntentService(
+  database.db,
+  messagingRegistry,
+  env.SESSION_SECRET,
+  env.PII_ENCRYPTION_KEY,
+  env.CHANNEL_LINK_TTL_MINUTES,
+);
+const channelActions = new ChannelActionTokenService(database.db, env.SESSION_SECRET);
+const messagingUpdates = new MessagingUpdateService(messagingRegistry, channelLinks, channelActions);
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(
@@ -67,6 +82,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/products', createProductRouter(catalogService));
 app.use('/api/categories', createCategoryRouter(catalogService));
 app.use('/api/banners', bannerRoutes);
+app.use('/api/messaging', createPublicMessagingRouter(env, messagingRegistry, messagingUpdates));
 app.use(
   '/api/auth',
   createAuthRouter({
@@ -78,6 +94,10 @@ app.use(
 app.use(
   '/api/seller/products',
   createSellerProductRouter(env, sellerSessionService, sellerProductService),
+);
+app.use(
+  '/api/seller/channels',
+  createSellerChannelRouter(env, sellerSessionService, messagingRegistry, channelLinks),
 );
 app.use(
   '/api/seller',

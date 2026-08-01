@@ -16,6 +16,8 @@ describe('parseEnv', () => {
     expect(config.PORT).toBe(3001);
     expect(config.SESSION_TTL_HOURS).toBe(720);
     expect(config.IDENTITY_STATE_TTL_MINUTES).toBe(10);
+    expect(config.CHANNEL_LINK_TTL_MINUTES).toBe(15);
+    expect(config.OUTBOX_BATCH_SIZE).toBe(20);
     expect(config.STORAGE_DRIVER).toBe('local');
     expect(config.DEV_IDENTITY_ENABLED).toBe(false);
   });
@@ -55,5 +57,15 @@ describe('parseEnv', () => {
         TELEGRAM_BOT_TOKEN: 'bot-token',
       }),
     ).toThrow('Telegram token and username must be configured together');
+  });
+
+  it('requires a Telegram webhook secret in production', () => {
+    expect(() => parseEnv({
+      ...baseEnv,
+      NODE_ENV: 'production',
+      STORAGE_DRIVER: 's3',
+      TELEGRAM_BOT_TOKEN: 'bot-token',
+      TELEGRAM_BOT_USERNAME: 'hutorynok_bot',
+    })).toThrow('Telegram webhook secret is required in production');
   });
 });

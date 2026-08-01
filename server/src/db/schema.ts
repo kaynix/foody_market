@@ -204,6 +204,7 @@ export const channelLinkIntents = pgTable(
     targetKind: channelTargetKindEnum('target_kind').notNull(),
     targetId: uuid('target_id'),
     browserSecretHash: text('browser_secret_hash').notNull(),
+    providerTokenHash: text('provider_token_hash').notNull(),
     confirmedDestinationEncrypted: text('confirmed_destination_encrypted'),
     destinationFingerprint: text('destination_fingerprint'),
     status: linkIntentStatusEnum('status').notNull().default('pending'),
@@ -213,7 +214,33 @@ export const channelLinkIntents = pgTable(
   },
   (table) => [
     uniqueIndex('channel_link_intents_browser_secret_uq').on(table.browserSecretHash),
+    uniqueIndex('channel_link_intents_provider_token_uq').on(table.providerTokenHash),
     index('channel_link_intents_expiry_idx').on(table.status, table.expiresAt),
+  ],
+);
+
+export const channelActionTokens = pgTable(
+  'channel_action_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tokenHash: text('token_hash').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    provider: text('provider').notNull(),
+    sellerId: uuid('seller_id')
+      .notNull()
+      .references(() => sellers.id, { onDelete: 'cascade' }),
+    destinationFingerprint: text('destination_fingerprint').notNull(),
+    aggregateType: text('aggregate_type').notNull(),
+    aggregateId: uuid('aggregate_id').notNull(),
+    action: text('action').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    consumedAt: timestamp('consumed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('channel_action_tokens_hash_uq').on(table.tokenHash),
+    uniqueIndex('channel_action_tokens_idempotency_uq').on(table.idempotencyKey),
+    index('channel_action_tokens_expiry_idx').on(table.expiresAt, table.consumedAt),
   ],
 );
 
@@ -338,6 +365,7 @@ export const outboxEvents = pgTable(
     attemptCount: integer('attempt_count').notNull().default(0),
     availableAt: timestamp('available_at', { withTimezone: true }).notNull().defaultNow(),
     lockedUntil: timestamp('locked_until', { withTimezone: true }),
+    lockToken: text('lock_token'),
     lastError: text('last_error'),
     ...timestamps(),
   },
@@ -393,6 +421,7 @@ export const schema = {
   products,
   productImages,
   channelLinkIntents,
+  channelActionTokens,
   channelConnections,
   checkoutGroups,
   sellerApplications,

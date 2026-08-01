@@ -14,6 +14,7 @@ function DashboardContent() {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/seller/settings" className="btn btn-primary">Налаштування магазину</Link>
           <Link href="/seller/products" className="btn btn-outline">Керувати товарами</Link>
+          <Link href="/seller/channels" className="btn btn-outline">Підключити messenger</Link>
           {seller ? <Link href={`/store/${seller.slug}`} className="btn btn-outline">Переглянути публічну сторінку</Link> : null}
         </div>
       </main>

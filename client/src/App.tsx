@@ -9,6 +9,8 @@ import CartPage from './pages/CartPage'
 import SellerDashboardPage from './pages/seller/SellerDashboardPage'
 import SellerOnboardingPage from './pages/seller/SellerOnboardingPage'
 import SellerSignInPage from './pages/seller/SellerSignInPage'
+import SellerSettingsPage from './pages/seller/SellerSettingsPage'
+import StorefrontPage from './pages/StorefrontPage'
 import { ThemeProvider } from './hooks/useTheme'
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
       <Switch>
         <Route path="/seller/sign-in" component={SellerSignInPage} />
         <Route path="/seller/onboarding" component={SellerOnboardingPage} />
+        <Route path="/seller/settings" component={SellerSettingsPage} />
         <Route path="/seller" component={SellerDashboardPage} />
         <Route>
           <Layout>
@@ -26,6 +29,7 @@ function App() {
           <Route path="/category/:slug" component={CategoryPage} />
           <Route path="/product/:id" component={ProductDetailPage} />
           <Route path="/cart" component={CartPage} />
+          <Route path="/store/:slug" component={StorefrontPage} />
           <Route>
             <div className="container mx-auto px-4 py-8">
               <div className="text-center">

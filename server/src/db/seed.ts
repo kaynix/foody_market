@@ -31,13 +31,14 @@ async function seed() {
         storeName: 'Hutorynok Demo Market',
         description: 'Development seller for the seeded catalogue.',
         region: 'Ukraine',
-        onboardingCompleted: false,
+        onboardingCompleted: true,
       })
       .onConflictDoUpdate({
         target: sellers.id,
         set: {
           storeName: 'Hutorynok Demo Market',
           providerSubjectHash: hashSecret('development:demo-seller', env.SESSION_SECRET),
+          onboardingCompleted: true,
           description: 'Development seller for the seeded catalogue.',
           region: 'Ukraine',
           updatedAt: new Date(),

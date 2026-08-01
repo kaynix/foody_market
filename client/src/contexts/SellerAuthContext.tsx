@@ -12,6 +12,7 @@ interface SellerAuthValue {
   error: string | null;
   signInDevelopment: (accountId: 'demo-seller' | 'new-seller') => Promise<SellerSession>;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<SellerSession | null>;
 }
 
 const SellerAuthContext = createContext<SellerAuthValue | null>(null);
@@ -50,8 +51,16 @@ export function SellerAuthProvider({ children }: { children: ReactNode }) {
     setSeller(null);
   };
 
+  const refreshSession = async () => {
+    const nextSeller = await fetchSellerSession();
+    setSeller(nextSeller);
+    return nextSeller;
+  };
+
   return (
-    <SellerAuthContext.Provider value={{ seller, loading, error, signInDevelopment, signOut }}>
+    <SellerAuthContext.Provider
+      value={{ seller, loading, error, signInDevelopment, signOut, refreshSession }}
+    >
       {children}
     </SellerAuthContext.Provider>
   );

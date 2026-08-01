@@ -12,9 +12,12 @@ export const errorHandler = (
   _next: NextFunction,
 ): void => {
   const statusCode = err.statusCode ?? 500;
-  const message = err.message || 'Internal Server Error';
+  const isExpected = statusCode < 500;
+  const message = isExpected ? err.message : 'Internal Server Error';
 
-  console.error(`[Error] ${statusCode} - ${message}`);
+  console.error(
+    `[Error] ${statusCode} - ${isExpected ? (err.code ?? err.name) : 'UNEXPECTED_ERROR'}`,
+  );
 
   res.status(statusCode).json({
     success: false,

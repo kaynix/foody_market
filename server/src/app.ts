@@ -8,12 +8,21 @@ import { createIdentityProviderRegistry } from './auth/registry';
 import { SellerSessionService } from './auth/sessionService';
 import { env } from './config/env';
 import { database } from './db/client';
+import { createSellerRouter, createStorefrontRouter } from './sellers/routes';
+import { SellerProfileService } from './sellers/service';
+import { StorefrontService } from './sellers/storefrontService';
 import productRoutes from './routes/products';
 import categoryRoutes from './routes/categories';
 import bannerRoutes from './routes/banners';
 import { errorHandler, notFound } from './middleware/errorHandler';
 
 const app = express();
+const sellerSessionService = new SellerSessionService(database.db, {
+  secret: env.SESSION_SECRET,
+  ttlHours: env.SESSION_TTL_HOURS,
+});
+const sellerProfileService = new SellerProfileService(database.db);
+const storefrontService = new StorefrontService(database.db);
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(
@@ -43,12 +52,18 @@ app.use(
   createAuthRouter({
     config: env,
     registry: createIdentityProviderRegistry(env),
-    sessionService: new SellerSessionService(database.db, {
-      secret: env.SESSION_SECRET,
-      ttlHours: env.SESSION_TTL_HOURS,
-    }),
+    sessionService: sellerSessionService,
   }),
 );
+app.use(
+  '/api/seller',
+  createSellerRouter({
+    config: env,
+    sessionService: sellerSessionService,
+    profileService: sellerProfileService,
+  }),
+);
+app.use('/api/storefronts', createStorefrontRouter(storefrontService));
 
 // ── 404 & Error handlers ────────────────────────────────────────────────────
 app.use(notFound);

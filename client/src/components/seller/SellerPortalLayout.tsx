@@ -15,6 +15,12 @@ export default function SellerPortalLayout({ children }: { children: ReactNode }
         {seller ? (
           <div className="flex items-center gap-3">
             <span className="hidden text-sm text-white/70 sm:inline">{seller.storeName}</span>
+            <Link href="/seller" className="btn btn-sm border-white/20 bg-white/10 text-white">
+              Кабінет
+            </Link>
+            <Link href="/seller/settings" className="hidden text-sm text-white/75 hover:text-white md:inline">
+              Налаштування
+            </Link>
             <button className="btn btn-sm border-white/20 bg-white/10 text-white" onClick={signOut}>
               Вийти
             </button>

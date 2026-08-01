@@ -35,13 +35,21 @@ export class ChannelNotificationService {
       .where(eq(sellerApplications.id, applicationId)).limit(1);
     if (!application) throw new AppHttpError('Application not found', 404, 'APPLICATION_NOT_FOUND');
 
-    if (eventType === 'application.created') {
+    if (eventType === 'application.created' || eventType === 'application.cancelled_by_buyer') {
       const [connection] = await this.db.select().from(channelConnections).where(and(
         eq(channelConnections.sellerId, application.sellerId),
         eq(channelConnections.active, true),
         eq(channelConnections.isPrimary, true),
       )).limit(1);
       if (!connection) throw new AppHttpError('Seller channel unavailable', 409, 'CHANNEL_UNAVAILABLE');
+      if (eventType === 'application.cancelled_by_buyer') {
+        await this.registry.require(connection.provider).send(
+          decryptString(connection.destinationEncrypted, this.encryptionKey),
+          { text: `Покупець скасував заявку для «${application.storeName}» на ${money(application.amountKopecks)}.` },
+          idempotencyKey,
+        );
+        return;
+      }
       const items = await this.db.select().from(applicationItems)
         .where(eq(applicationItems.applicationId, application.id)).orderBy(asc(applicationItems.id));
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60_000);

@@ -39,8 +39,17 @@ export interface Category {
 }
 
 export interface CartItem {
-  product: Product;
+  productId: string;
+  sellerId: string;
   quantity: number;
+  productSnapshot: {
+    name: string;
+    priceKopecks: number;
+    unit: string;
+    minimumQuantity: number;
+    image: string | null;
+    seller: Product['seller'];
+  };
 }
 
 export interface User {

@@ -3,21 +3,25 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:30
 interface ApiErrorBody {
   message?: string;
   code?: string;
+  details?: unknown;
 }
 
 export class ApiError extends Error {
   readonly status: number;
   readonly code?: string;
+  readonly details?: unknown;
 
   constructor(
     message: string,
     status: number,
     code?: string,
+    details?: unknown,
   ) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -46,7 +50,12 @@ export async function requestJson<T>(
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as ApiErrorBody;
-    throw new ApiError(body.message ?? `API error ${response.status}`, response.status, body.code);
+    throw new ApiError(
+      body.message ?? `API error ${response.status}`,
+      response.status,
+      body.code,
+      body.details,
+    );
   }
 
   if (response.status === 204) return undefined as T;

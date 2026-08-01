@@ -25,6 +25,8 @@ import { ChannelLinkIntentService } from './messaging/linkIntentService';
 import { createMessagingRegistry } from './messaging/registry';
 import { createPublicMessagingRouter, createSellerChannelRouter } from './messaging/routes';
 import { MessagingUpdateService } from './messaging/updateService';
+import { CheckoutService } from './checkout/service';
+import { createCheckoutRouter, createTrackingRouter } from './checkout/routes';
 
 const app = express();
 const sellerSessionService = new SellerSessionService(database.db, {
@@ -52,6 +54,12 @@ const channelLinks = new ChannelLinkIntentService(
 );
 const channelActions = new ChannelActionTokenService(database.db, env.SESSION_SECRET);
 const messagingUpdates = new MessagingUpdateService(messagingRegistry, channelLinks, channelActions);
+const checkoutService = new CheckoutService(
+  database.db,
+  channelLinks,
+  env.SESSION_SECRET,
+  env.PII_ENCRYPTION_KEY,
+);
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(
@@ -83,6 +91,8 @@ app.use('/api/products', createProductRouter(catalogService));
 app.use('/api/categories', createCategoryRouter(catalogService));
 app.use('/api/banners', bannerRoutes);
 app.use('/api/messaging', createPublicMessagingRouter(env, messagingRegistry, messagingUpdates));
+app.use('/api/checkout', createCheckoutRouter(checkoutService));
+app.use('/api/tracking', createTrackingRouter(checkoutService));
 app.use(
   '/api/auth',
   createAuthRouter({

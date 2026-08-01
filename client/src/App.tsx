@@ -6,6 +6,8 @@ import HomePage from './pages/HomePage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CategoryPage from './pages/CategoryPage'
 import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
+import TrackingPage from './pages/TrackingPage'
 import SellerDashboardPage from './pages/seller/SellerDashboardPage'
 import SellerOnboardingPage from './pages/seller/SellerOnboardingPage'
 import SellerSignInPage from './pages/seller/SellerSignInPage'
@@ -36,6 +38,8 @@ function App() {
           <Route path="/category/:slug" component={CategoryPage} />
           <Route path="/product/:id" component={ProductDetailPage} />
           <Route path="/cart" component={CartPage} />
+          <Route path="/checkout" component={CheckoutPage} />
+          <Route path="/tracking/:groupId" component={TrackingPage} />
           <Route path="/store/:slug" component={StorefrontPage} />
           <Route>
             <div className="container mx-auto px-4 py-8">

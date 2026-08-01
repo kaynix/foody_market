@@ -1,157 +1,44 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { formatUah } from '../utils/money';
 import { useCart } from '../contexts/CartContext';
-import { getTranslatedCategoryName } from '../utils/categoryUtils';
+import { formatUah } from '../utils/money';
 
-const CartPage: React.FC = () => {
+export default function CartPage() {
   const { t } = useTranslation();
-  const { cartItems, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, getTotalKopecks, clearCart } = useCart();
+  const groups = useMemo(() => {
+    const bySeller = new Map<string, typeof cartItems>();
+    for (const item of cartItems) {
+      const current = bySeller.get(item.sellerId) ?? [];
+      current.push(item);
+      bySeller.set(item.sellerId, current);
+    }
+    return [...bySeller.values()];
+  }, [cartItems]);
 
-  if (cartItems.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-base-content mb-4">{t('cart')}</h1>
-          <div className="bg-base-200 rounded-lg p-8">
-            <div className="text-6xl mb-4">🛒</div>
-            <h2 className="text-xl font-semibold text-base-content mb-2">{t('emptyCart')}</h2>
-            <p className="text-base-content/70 mb-6">{t('emptyCartDescription')}</p>
-            <Link href="/">
-              <button className="btn btn-primary">{t('continueShopping')}</button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (cartItems.length === 0) return <div className="cart-empty"><span>К</span><h1>{t('emptyCart')}</h1><p>{t('emptyCartDescription')}</p><Link href="/" className="btn btn-primary">{t('continueShopping')}</Link></div>;
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumbs */}
-      <div className="breadcrumbs text-sm mb-6">
-        <ul>
-          <li><Link href="/" className="text-primary hover:text-primary-focus">{t('home')}</Link></li>
-          <li className="text-base-content">{t('cart')}</li>
-        </ul>
-      </div>
-
-      {/* Page Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-base-content">{t('cart')}</h1>
-        <button 
-          className="btn btn-outline btn-error"
-          onClick={clearCart}
-        >
-          {t('clearCart')}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2">
-          <div className="space-y-4">
-            {cartItems.map((item) => (
-              <div key={item.product.id} className="card bg-base-100 shadow border border-base-300">
-                <div className="card-body">
-                  <div className="flex items-center space-x-4">
-                    {/* Product Image */}
-                    <div className="w-20 h-20 flex-shrink-0">
-                      {item.product.image ? <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover rounded-lg" /> : <div className="grid h-full w-full place-items-center rounded-lg bg-base-200 text-xs">Без фото</div>}
-                    </div>
-
-                    {/* Product Details */}
-                    <div className="flex-grow">
-                      <Link href={`/product/${item.product.id}`}>
-                        <h3 className="font-semibold text-base-content hover:text-primary cursor-pointer">
-                          {item.product.name}
-                        </h3>
-                      </Link>
-                      <p className="text-sm text-base-content/60">
-                        {getTranslatedCategoryName(item.product.categoryId, t)}
-                      </p>
-                      <p className="text-lg font-bold text-primary">{formatUah(item.product.priceKopecks)}</p>
-                    </div>
-
-                    {/* Quantity Controls */}
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        className="btn btn-sm btn-circle btn-outline"
-                        onClick={() => updateQuantity(item.product.id, Math.max(0, item.quantity - 1))}
-                      >
-                        -
-                      </button>
-                      <span className="w-12 text-center font-semibold">{item.quantity}</span>
-                      <button 
-                        className="btn btn-sm btn-circle btn-outline"
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    {/* Item Total */}
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-base-content">
-                        {formatUah(item.product.priceKopecks * item.quantity)}
-                      </p>
-                      <button 
-                        className="btn btn-sm btn-ghost text-error"
-                        onClick={() => removeFromCart(item.product.id)}
-                      >
-                        {t('remove')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="card bg-base-100 shadow border border-base-300 sticky top-4">
-            <div className="card-body">
-              <h2 className="card-title text-base-content">{t('orderSummary')}</h2>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between text-base-content/70">
-                  <span>{t('subtotal')}</span>
-                  <span>₴{getTotalPrice().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-base-content/70">
-                  <span>{t('shipping')}</span>
-                  <span>{t('freeShipping')}</span>
-                </div>
-                <div className="flex justify-between text-base-content/70">
-                  <span>{t('tax')}</span>
-                  <span>₴{(getTotalPrice() * 0.1).toFixed(2)}</span>
-                </div>
-                <div className="divider"></div>
-                <div className="flex justify-between text-lg font-bold text-base-content">
-                  <span>{t('total')}</span>
-                  <span>₴{(getTotalPrice() * 1.1).toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div className="card-actions mt-6">
-                <button className="btn btn-primary w-full">
-                  {t('proceedToCheckout')}
-                </button>
-                <Link href="/" className="w-full">
-                  <button className="btn btn-outline w-full">
-                    {t('continueShopping')}
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  return <main className="market-cart">
+    <header className="market-cart__heading"><div><p className="seller-kicker">Одна корзина · окремі заявки</p><h1>{t('cart')}</h1></div><button className="btn btn-ghost text-error" onClick={clearCart}>{t('clearCart')}</button></header>
+    <div className="market-cart__layout">
+      <section className="market-cart__groups">
+        {groups.map((items, index) => {
+          const seller = items[0].productSnapshot.seller;
+          const subtotal = items.reduce((sum, item) => sum + item.productSnapshot.priceKopecks * item.quantity, 0);
+          return <article className="market-cart__seller" key={seller.id}>
+            <header><span>{String(index + 1).padStart(2, '0')}</span><div><small>Окрема заявка продавцю</small><Link href={`/store/${seller.slug}`}>{seller.storeName}</Link></div><strong>{formatUah(subtotal)}</strong></header>
+            {items.map((item) => <div className="market-cart__item" key={item.productId}>
+              {item.productSnapshot.image ? <img src={item.productSnapshot.image} alt={item.productSnapshot.name} /> : <div className="market-cart__placeholder">Фото</div>}
+              <div><Link href={`/product/${item.productId}`}><h2>{item.productSnapshot.name}</h2></Link><p>{formatUah(item.productSnapshot.priceKopecks)} / {item.productSnapshot.unit}</p></div>
+              <div className="market-cart__quantity"><button aria-label="Зменшити кількість" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>−</button><strong>{item.quantity}</strong><button aria-label="Збільшити кількість" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>＋</button></div>
+              <strong>{formatUah(item.productSnapshot.priceKopecks * item.quantity)}</strong>
+              <button className="market-cart__remove" onClick={() => removeFromCart(item.productId)}>{t('remove')}</button>
+            </div>)}
+          </article>;
+        })}
+      </section>
+      <aside className="market-cart__summary"><p className="seller-kicker">Підсумок</p><h2>{groups.length} {groups.length === 1 ? 'заявка' : 'заявки'}</h2><div><span>Товари</span><strong>{formatUah(getTotalKopecks())}</strong></div><p>Доставка узгоджується окремо з кожним продавцем. Податків та прихованих доплат немає.</p><Link href="/checkout" className="btn btn-primary w-full">Оформити заявки</Link><Link href="/" className="btn btn-outline w-full">{t('continueShopping')}</Link></aside>
     </div>
-  );
-};
-
-export default CartPage;
+  </main>;
+}

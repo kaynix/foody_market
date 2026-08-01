@@ -26,6 +26,20 @@ export function createPublicMessagingRouter(
   router.get('/providers', (_request, response) => {
     response.json({ providers: registry.list(), defaultProvider: registry.defaultProvider() });
   });
+  router.post('/link-intents', async (request, response, next) => {
+    try {
+      const parsed = z.object({ provider: providerSchema }).safeParse(request.body);
+      if (!parsed.success) throw new AppHttpError('Invalid provider', 400, 'VALIDATION_ERROR');
+      response.status(201).json(await updates.createBuyerIntent(parsed.data.provider));
+    } catch (error) { next(error); }
+  });
+  router.get('/link-intents/status', async (request, response, next) => {
+    try {
+      const secret = request.get('x-link-secret');
+      if (!secret) throw new AppHttpError('Link secret is required', 400, 'LINK_SECRET_REQUIRED');
+      response.json(await updates.getBuyerIntent(secret));
+    } catch (error) { next(error); }
+  });
   router.post('/telegram/webhook', async (request, response, next) => {
     try {
       const supplied = request.get('x-telegram-bot-api-secret-token');

@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { CartItem, Product } from '../types';
+import { readCart, writeCart } from '../cart/storage';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -8,8 +9,9 @@ interface CartContextType {
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  removeProducts: (productIds: string[]) => void;
   getTotalItems: () => number;
-  getTotalPrice: () => number;
+  getTotalKopecks: () => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -19,27 +21,42 @@ interface CartProviderProps {
 }
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => readCart());
+
+  useEffect(() => writeCart(cartItems), [cartItems]);
 
   const addToCart = useCallback((product: Product, quantity: number = 1) => {
     if (!product.acceptingApplications) return;
+    const addedQuantity = Math.max(quantity, product.minimumQuantity);
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.product.id === product.id);
+      const existingItem = prevItems.find(item => item.productId === product.id);
       
       if (existingItem) {
         return prevItems.map(item =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+          item.productId === product.id
+            ? { ...item, quantity: item.quantity + addedQuantity }
             : item
         );
       } else {
-        return [...prevItems, { product, quantity }];
+        return [...prevItems, {
+          productId: product.id,
+          sellerId: product.seller.id,
+          quantity: addedQuantity,
+          productSnapshot: {
+            name: product.name,
+            priceKopecks: product.priceKopecks,
+            unit: product.unit,
+            minimumQuantity: product.minimumQuantity,
+            image: product.image,
+            seller: product.seller,
+          },
+        }];
       }
     });
   }, []);
 
   const removeFromCart = useCallback((productId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId));
+    setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
   }, []);
 
   const updateQuantity = useCallback((productId: string, quantity: number) => {
@@ -48,25 +65,26 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       return;
     }
 
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.product.id === productId
-          ? { ...item, quantity }
-          : item
-      )
-    );
+    setCartItems(prevItems => prevItems.map(item => item.productId === productId
+      ? { ...item, quantity: Math.max(quantity, item.productSnapshot.minimumQuantity) }
+      : item));
   }, [removeFromCart]);
 
   const clearCart = useCallback(() => {
     setCartItems([]);
   }, []);
 
+  const removeProducts = useCallback((productIds: string[]) => {
+    const accepted = new Set(productIds);
+    setCartItems((items) => items.filter((item) => !accepted.has(item.productId)));
+  }, []);
+
   const getTotalItems = useCallback(() => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   }, [cartItems]);
 
-  const getTotalPrice = useCallback(() => {
-    return cartItems.reduce((total, item) => total + (item.product.priceKopecks * item.quantity), 0) / 100;
+  const getTotalKopecks = useCallback(() => {
+    return cartItems.reduce((total, item) => total + (item.productSnapshot.priceKopecks * item.quantity), 0);
   }, [cartItems]);
 
   const value: CartContextType = {
@@ -75,8 +93,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    removeProducts,
     getTotalItems,
-    getTotalPrice,
+    getTotalKopecks,
   };
 
   return (

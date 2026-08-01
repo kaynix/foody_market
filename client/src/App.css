@@ -189,6 +189,87 @@ a {
   .seller-channel-intent { align-items: stretch; flex-direction: column; }
 }
 
+.market-cart, .market-checkout, .market-tracking {
+  width: min(1220px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(2.5rem, 7vw, 6rem) 0;
+}
+.market-cart__heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+.market-cart__heading h1, .market-checkout > header h1, .market-tracking > header h1 { font-size: clamp(2.6rem, 7vw, 5.4rem); font-weight: 850; letter-spacing: -0.065em; line-height: 0.95; }
+.market-cart__layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 1.5rem; align-items: start; }
+.market-cart__groups { display: grid; gap: 1rem; }
+.market-cart__seller { overflow: hidden; border: 1px solid #d9e1ef; border-radius: 1.1rem; background: white; box-shadow: 0 12px 34px rgb(23 32 56 / 6%); }
+.market-cart__seller > header { display: grid; grid-template-columns: auto 1fr auto; gap: 0.9rem; align-items: center; padding: 1rem 1.2rem; border-bottom: 1px solid #e2e8f0; background: #f5f8ff; }
+.market-cart__seller > header > span, .tracking-application > header > span { font-family: ui-monospace, monospace; color: var(--seller-blue); font-weight: 800; }
+.market-cart__seller > header small, .tracking-application > header small { display: block; color: #718096; }
+.market-cart__seller > header a, .tracking-application > header a { font-size: 1.15rem; font-weight: 850; }
+.market-cart__item { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto auto; gap: 1rem; align-items: center; padding: 1rem 1.2rem; border-bottom: 1px dashed #e2e8f0; }
+.market-cart__item:last-child { border-bottom: 0; }
+.market-cart__item img, .market-cart__placeholder { width: 64px; height: 64px; border-radius: 0.7rem; object-fit: cover; }
+.market-cart__placeholder { display: grid; place-items: center; background: #edf1f7; color: #718096; font-size: 0.72rem; }
+.market-cart__item h2 { font-weight: 800; }
+.market-cart__item p { color: #718096; font-size: 0.85rem; }
+.market-cart__quantity { display: flex; align-items: center; gap: 0.55rem; }
+.market-cart__quantity button { display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid #cbd5e1; border-radius: 50%; }
+.market-cart__remove { color: #b42318; font-size: 0.8rem; }
+.market-cart__summary { position: sticky; top: 5.5rem; display: grid; gap: 1rem; padding: 1.4rem; border-radius: 1rem; background: #172038; color: white; }
+.market-cart__summary h2 { font-size: 1.65rem; font-weight: 850; }
+.market-cart__summary > div { display: flex; justify-content: space-between; padding: 1rem 0; border-block: 1px solid rgb(255 255 255 / 14%); }
+.market-cart__summary > p:not(.seller-kicker) { color: rgb(255 255 255 / 65%); font-size: 0.85rem; }
+.cart-empty, .checkout-empty, .tracking-missing { display: grid; min-height: 65vh; place-items: center; align-content: center; gap: 1rem; padding: 2rem; text-align: center; }
+.cart-empty > span { display: grid; width: 4rem; height: 4rem; place-items: center; border-radius: 50%; background: var(--seller-yellow); font-size: 1.4rem; font-weight: 900; }
+.cart-empty h1, .checkout-empty h1, .tracking-missing h1 { font-size: 2rem; font-weight: 850; }
+
+.market-checkout > header, .market-tracking > header { max-width: 880px; margin-bottom: 2.5rem; }
+.market-checkout > header > p:last-child, .market-tracking > header > p:last-child { max-width: 680px; margin-top: 1rem; color: #647087; font-size: 1.05rem; }
+.market-checkout__layout { display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; margin-top: 1rem; }
+.market-checkout__route { position: relative; display: grid; gap: 1rem; }
+.market-checkout__route::before { content: ""; position: absolute; top: 2rem; bottom: 2rem; left: 1.3rem; border-left: 2px dashed #b9c9e8; }
+.checkout-seller-stop { position: relative; display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 1rem; align-items: start; }
+.checkout-seller-stop__number { z-index: 1; display: grid; width: 2.6rem; height: 2.6rem; place-items: center; border: 4px solid #f5f8ff; border-radius: 50%; background: var(--seller-blue); color: white; font-family: ui-monospace, monospace; font-weight: 800; }
+.checkout-seller-stop__card { display: grid; gap: 1rem; padding: 1.4rem; border: 1px solid #d9e1ef; border-radius: 1rem; background: white; }
+.checkout-seller-stop__heading { display: flex; justify-content: space-between; gap: 1rem; }
+.checkout-seller-stop__heading small { color: #718096; }
+.checkout-seller-stop__heading h2 { font-size: 1.35rem; font-weight: 850; }
+.checkout-seller-stop__card ul { display: grid; gap: 0.5rem; padding: 0.8rem 0; border-block: 1px dashed #d9e1ef; }
+.checkout-seller-stop__card li { display: flex; justify-content: space-between; gap: 1rem; }
+.checkout-delivery-note { color: #647087; font-size: 0.82rem; }
+.market-checkout__buyer { position: sticky; top: 5.5rem; display: grid; gap: 1rem; padding: 1.5rem; border: 1px solid #d9e1ef; border-radius: 1.1rem; background: white; box-shadow: 12px 12px 0 #dce6fa; }
+.market-checkout__buyer h2 { font-size: 1.55rem; font-weight: 850; }
+.checkout-channel { display: grid; gap: 0.75rem; margin: 0.35rem 0; padding: 1rem; border-radius: 0.85rem; background: #f1f6ff; }
+.checkout-channel p, .checkout-privacy { color: #647087; font-size: 0.8rem; }
+.checkout-channel select { width: 100%; border: 1px solid #cbd5e1; border-radius: 0.6rem; background: white; padding: 0.7rem; }
+.checkout-channel__status { color: #8a5b00; font-size: 0.8rem; font-weight: 750; }
+.checkout-channel__status.is-confirmed { color: #137044; }
+.checkout-privacy { text-align: center; }
+
+.tracking-applications { display: grid; gap: 1rem; }
+.tracking-application { padding: 1.3rem; border: 1px solid #d9e1ef; border-left: 5px solid #b9c9e8; border-radius: 1rem; background: white; }
+.tracking-application.is-accepted, .tracking-application.is-completed { border-left-color: var(--seller-green); }
+.tracking-application.is-rejected, .tracking-application.is-cancelled { border-left-color: #c45145; }
+.tracking-application > header { display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: center; }
+.tracking-application > header > strong { padding: 0.4rem 0.7rem; border-radius: 999px; background: #edf1f7; font-size: 0.8rem; }
+.tracking-application__body { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 1rem; margin: 1.2rem 0; padding-top: 1.2rem; border-top: 1px dashed #d9e1ef; }
+.tracking-application__body section { min-width: 0; }
+.tracking-application__body h2 { margin-bottom: 0.65rem; font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.06em; }
+.tracking-application__body ul { display: grid; gap: 0.45rem; }
+.tracking-application__body li, .tracking-total, .tracking-application__body section:last-child p { display: flex; justify-content: space-between; gap: 0.8rem; }
+.tracking-total { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid #e2e8f0; }
+.tracking-application__body p, .tracking-application__body small { overflow-wrap: anywhere; color: #647087; }
+
+@media (max-width: 900px) {
+  .market-cart__layout, .market-checkout__layout { grid-template-columns: 1fr; }
+  .market-cart__summary, .market-checkout__buyer { position: static; }
+  .tracking-application__body { grid-template-columns: 1fr; }
+}
+@media (max-width: 650px) {
+  .market-cart__item { grid-template-columns: 54px minmax(0, 1fr) auto; }
+  .market-cart__item > strong, .market-cart__remove { grid-column: 2 / -1; justify-self: start; }
+  .market-cart__item img, .market-cart__placeholder { width: 54px; height: 54px; }
+  .market-cart__heading, .tracking-application > header { align-items: start; flex-direction: column; grid-template-columns: auto 1fr; }
+  .tracking-application > header > strong { grid-column: 2; justify-self: start; }
+}
+
 .seller-product-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
 .seller-product-heading h1 { margin-bottom: 0; }
 .seller-product-list { display: grid; gap: 0.85rem; }

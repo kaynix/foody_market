@@ -10,6 +10,14 @@ export class MessagingUpdateService {
     private readonly actions: ChannelActionTokenService,
   ) {}
 
+  createBuyerIntent(provider: string) {
+    return this.links.createBuyerIntent(provider);
+  }
+
+  getBuyerIntent(browserSecret: string) {
+    return this.links.getBuyerIntent(browserSecret);
+  }
+
   async handle(provider: string, update: unknown) {
     const adapter = this.registry.require(provider);
     const decoded = adapter.decodeUpdate(update);

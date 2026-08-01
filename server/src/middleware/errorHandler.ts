@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 export interface AppError extends Error {
   statusCode?: number;
   code?: string;
+  details?: unknown;
 }
 
 export const errorHandler = (
@@ -24,6 +25,7 @@ export const errorHandler = (
     message,
     statusCode,
     ...(err.code ? { code: err.code } : {}),
+    ...(err.details !== undefined ? { details: err.details } : {}),
   });
 };
 

@@ -16,6 +16,14 @@ export class ChannelLinkIntentService {
   ) {}
 
   async createSellerIntent(sellerId: string, provider: string) {
+    return this.createIntent(provider, 'seller', sellerId);
+  }
+
+  async createBuyerIntent(provider: string) {
+    return this.createIntent(provider, 'buyer', null);
+  }
+
+  private async createIntent(provider: string, targetKind: 'seller' | 'buyer', targetId: string | null) {
     const adapter = this.registry.get(provider);
     if (!adapter) throw new AppHttpError('Messaging provider is unavailable', 409, 'CHANNEL_UNAVAILABLE');
     const browserSecret = createOpaqueToken();
@@ -23,8 +31,8 @@ export class ChannelLinkIntentService {
     const expiresAt = new Date(Date.now() + this.ttlMinutes * 60_000);
     const [intent] = await this.db.insert(channelLinkIntents).values({
       provider,
-      targetKind: 'seller',
-      targetId: sellerId,
+      targetKind,
+      targetId,
       browserSecretHash: hashSecret(browserSecret, this.secret),
       providerTokenHash: hashSecret(providerToken, this.secret),
       expiresAt,
@@ -39,16 +47,25 @@ export class ChannelLinkIntentService {
     };
   }
 
+  async getBuyerIntent(browserSecret: string) {
+    return this.getIntent(browserSecret, 'buyer');
+  }
+
   async getSellerIntent(sellerId: string, browserSecret: string) {
+    return this.getIntent(browserSecret, 'seller', sellerId);
+  }
+
+  private async getIntent(browserSecret: string, targetKind: 'seller' | 'buyer', targetId?: string) {
+    const conditions = [
+      eq(channelLinkIntents.browserSecretHash, hashSecret(browserSecret, this.secret)),
+      eq(channelLinkIntents.targetKind, targetKind),
+    ];
+    if (targetId) conditions.push(eq(channelLinkIntents.targetId, targetId));
     const [intent] = await this.db.select({
       provider: channelLinkIntents.provider,
       status: channelLinkIntents.status,
       expiresAt: channelLinkIntents.expiresAt,
-    }).from(channelLinkIntents).where(and(
-      eq(channelLinkIntents.browserSecretHash, hashSecret(browserSecret, this.secret)),
-      eq(channelLinkIntents.targetKind, 'seller'),
-      eq(channelLinkIntents.targetId, sellerId),
-    )).limit(1);
+    }).from(channelLinkIntents).where(and(...conditions)).limit(1);
     if (!intent) throw new AppHttpError('Link intent not found', 404, 'LINK_INTENT_NOT_FOUND');
     if (intent.status === 'pending' && intent.expiresAt <= new Date()) {
       await this.db.update(channelLinkIntents).set({ status: 'expired', updatedAt: new Date() }).where(and(
@@ -58,6 +75,39 @@ export class ChannelLinkIntentService {
       return { ...intent, status: 'expired' as const };
     }
     return intent;
+  }
+
+  async consumeBuyerIntent(
+    transaction: Parameters<Parameters<Database['transaction']>[0]>[0],
+    provider: string,
+    browserSecret: string,
+  ) {
+    const [intent] = await transaction.select().from(channelLinkIntents).where(and(
+      eq(channelLinkIntents.browserSecretHash, hashSecret(browserSecret, this.secret)),
+      eq(channelLinkIntents.provider, provider),
+      eq(channelLinkIntents.targetKind, 'buyer'),
+    )).for('update').limit(1);
+    if (!intent) throw new AppHttpError('Buyer channel confirmation not found', 409, 'BUYER_CHANNEL_INVALID');
+    if (intent.expiresAt <= new Date()) {
+      await transaction.update(channelLinkIntents).set({ status: 'expired', updatedAt: new Date() })
+        .where(eq(channelLinkIntents.id, intent.id));
+      throw new AppHttpError('Buyer channel confirmation expired', 409, 'BUYER_CHANNEL_EXPIRED');
+    }
+    if (
+      intent.status !== 'confirmed'
+      || !intent.confirmedDestinationEncrypted
+      || !intent.destinationFingerprint
+    ) {
+      throw new AppHttpError('Buyer channel is not confirmed', 409, 'BUYER_CHANNEL_UNCONFIRMED');
+    }
+    await transaction.update(channelLinkIntents).set({
+      status: 'consumed', consumedAt: new Date(), updatedAt: new Date(),
+    }).where(and(eq(channelLinkIntents.id, intent.id), eq(channelLinkIntents.status, 'confirmed')));
+    return {
+      provider: intent.provider,
+      destinationEncrypted: intent.confirmedDestinationEncrypted,
+      destinationFingerprint: intent.destinationFingerprint,
+    };
   }
 
   async confirm(provider: string, providerToken: string, destination: string) {

@@ -34,6 +34,29 @@ export function fetchSellerChannels(): Promise<SellerChannels> {
   return requestJson('/api/seller/channels');
 }
 
+export function fetchMessagingProviders(): Promise<{
+  providers: ChannelProvider[];
+  defaultProvider: string | null;
+}> {
+  return requestJson('/api/messaging/providers');
+}
+
+export function createBuyerChannelLinkIntent(provider: string): Promise<ChannelLinkIntent> {
+  return requestJson('/api/messaging/link-intents', {
+    method: 'POST', body: JSON.stringify({ provider }),
+  });
+}
+
+export function fetchBuyerChannelLinkStatus(browserSecret: string): Promise<{
+  provider: string;
+  status: 'pending' | 'confirmed' | 'consumed' | 'expired';
+  expiresAt: string;
+}> {
+  return requestJson('/api/messaging/link-intents/status', {
+    headers: { 'x-link-secret': browserSecret },
+  });
+}
+
 export function createChannelLinkIntent(provider: string): Promise<ChannelLinkIntent> {
   return requestJson('/api/seller/channels/link-intents', {
     method: 'POST', body: JSON.stringify({ provider }), csrf: true,

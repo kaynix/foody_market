@@ -18,7 +18,7 @@
 
 ### PostgreSQL
 
-1. Установить `postgresql` и `postgresql-contrib` штатными пакетами Ubuntu после отдельного подтверждения системной команды.
+1. Установить `postgresql` и `postgresql-contrib` только штатными `.deb`-пакетами Ubuntu через `apt` после отдельного подтверждения команды с `sudo`. Не использовать Snap, Flatpak, Docker, сторонние репозитории или скачиваемые install-скрипты.
 2. Создать роли и базы `hutorynok` и `hutorynok_test`; пароль хранить только в локальном `server/.env`.
 3. Проверить доступ командами `pg_isready` и `psql "$DATABASE_URL" -c 'select 1'`.
 

@@ -3,6 +3,8 @@
 **/.env
 !**/.env.example
 *.log
+**/coverage/
+server/var/
 .DS_Store
 .idea/
 .vscode/

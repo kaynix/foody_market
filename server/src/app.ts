@@ -1,21 +1,19 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import path from 'path';
 
+import { env } from './config/env';
 import productRoutes from './routes/products';
 import categoryRoutes from './routes/categories';
 import bannerRoutes from './routes/banners';
 import { errorHandler, notFound } from './middleware/errorHandler';
-
-dotenv.config();
 
 const app = express();
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    origin: env.FRONTEND_URL,
     credentials: true,
   }),
 );

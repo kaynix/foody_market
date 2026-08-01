@@ -1,0 +1,57 @@
+import { describe, expect, it } from 'vitest';
+import { parseEnv } from './env';
+
+const baseEnv = {
+  NODE_ENV: 'development',
+  DATABASE_URL: 'postgresql:///hutorynok',
+  TEST_DATABASE_URL: 'postgresql:///hutorynok_test',
+  SESSION_SECRET: 'a'.repeat(32),
+  PII_ENCRYPTION_KEY: '1'.repeat(64),
+};
+
+describe('parseEnv', () => {
+  it('applies safe development defaults', () => {
+    const config = parseEnv(baseEnv);
+
+    expect(config.PORT).toBe(3001);
+    expect(config.STORAGE_DRIVER).toBe('local');
+    expect(config.DEV_IDENTITY_ENABLED).toBe(false);
+  });
+
+  it('requires a separate database in test mode', () => {
+    expect(() =>
+      parseEnv({
+        ...baseEnv,
+        NODE_ENV: 'test',
+        TEST_DATABASE_URL: '',
+      }),
+    ).toThrow('TEST_DATABASE_URL');
+  });
+
+  it('requires an encryption key', () => {
+    const { PII_ENCRYPTION_KEY: _omitted, ...withoutEncryptionKey } = baseEnv;
+
+    expect(() => parseEnv(withoutEncryptionKey)).toThrow('PII_ENCRYPTION_KEY');
+  });
+
+  it('rejects unsafe production-only settings', () => {
+    expect(() =>
+      parseEnv({
+        ...baseEnv,
+        NODE_ENV: 'production',
+        DEV_IDENTITY_ENABLED: 'true',
+        STORAGE_DRIVER: 'local',
+        PII_ENCRYPTION_KEY: '0'.repeat(64),
+      }),
+    ).toThrow('Development identity must be disabled');
+  });
+
+  it('requires Telegram credentials as a pair', () => {
+    expect(() =>
+      parseEnv({
+        ...baseEnv,
+        TELEGRAM_BOT_TOKEN: 'bot-token',
+      }),
+    ).toThrow('Telegram token and username must be configured together');
+  });
+});

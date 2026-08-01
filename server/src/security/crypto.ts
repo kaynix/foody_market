@@ -62,6 +62,8 @@ export function hashSecret(value: string, secret: string): string {
 }
 
 export function verifySecretHash(value: string, expectedHash: string, secret: string): boolean {
+  if (!/^[a-f0-9]{64}$/i.test(expectedHash)) return false;
+
   const actual = Buffer.from(hashSecret(value, secret), 'hex');
   const expected = Buffer.from(expectedHash, 'hex');
   return actual.length === expected.length && timingSafeEqual(actual, expected);

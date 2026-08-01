@@ -20,6 +20,8 @@ const envSchema = z
     DATABASE_URL: z.string().trim().min(1),
     TEST_DATABASE_URL: optionalString,
     SESSION_SECRET: z.string().min(32),
+    SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(8760).default(720),
+    IDENTITY_STATE_TTL_MINUTES: z.coerce.number().int().min(1).max(60).default(10),
     PII_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/),
     DEV_IDENTITY_ENABLED: booleanString,
     STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),

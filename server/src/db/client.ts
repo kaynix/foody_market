@@ -10,7 +10,10 @@ export function createDatabase(connectionString: string) {
   return { db, pool };
 }
 
-export const database = createDatabase(env.DATABASE_URL);
+const runtimeDatabaseUrl =
+  env.NODE_ENV === 'test' ? (env.TEST_DATABASE_URL ?? env.DATABASE_URL) : env.DATABASE_URL;
+
+export const database = createDatabase(runtimeDatabaseUrl);
 
 export type Database = ReturnType<typeof createDatabase>['db'];
 export type DatabaseTransaction = Parameters<Parameters<Database['transaction']>[0]>[0];

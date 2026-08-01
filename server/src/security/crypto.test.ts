@@ -29,5 +29,6 @@ describe('secret hashing', () => {
     expect(hash).not.toContain('tracking-token');
     expect(verifySecretHash('tracking-token', hash, 'server-secret')).toBe(true);
     expect(verifySecretHash('wrong-token', hash, 'server-secret')).toBe(false);
+    expect(verifySecretHash('tracking-token', `${hash}x`, 'server-secret')).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
-import { createHash } from 'node:crypto';
 import { categories as mockCategories, mockProducts } from '../data/mockData';
 import { database, inTransaction } from './client';
+import { env } from '../config/env';
+import { hashSecret } from '../security/crypto';
 import {
   categories,
   productImages,
@@ -25,9 +26,7 @@ async function seed() {
       .values({
         id: DEMO_SELLER_ID,
         identityProvider: 'development',
-        providerSubjectHash: createHash('sha256')
-          .update('development:demo-seller')
-          .digest('hex'),
+        providerSubjectHash: hashSecret('development:demo-seller', env.SESSION_SECRET),
         slug: 'demo-market',
         storeName: 'Hutorynok Demo Market',
         description: 'Development seller for the seeded catalogue.',
@@ -38,6 +37,7 @@ async function seed() {
         target: sellers.id,
         set: {
           storeName: 'Hutorynok Demo Market',
+          providerSubjectHash: hashSecret('development:demo-seller', env.SESSION_SECRET),
           description: 'Development seller for the seeded catalogue.',
           region: 'Ukraine',
           updatedAt: new Date(),

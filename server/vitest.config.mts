@@ -5,6 +5,9 @@ export default defineConfig({
     environment: 'node',
     fileParallelism: false,
     include: ['src/**/*.test.ts'],
+    env: {
+      DEV_IDENTITY_ENABLED: 'true',
+    },
     coverage: {
       reporter: ['text', 'html'],
     },

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 export interface AppError extends Error {
   statusCode?: number;
+  code?: string;
 }
 
 export const errorHandler = (
@@ -19,6 +20,7 @@ export const errorHandler = (
     success: false,
     message,
     statusCode,
+    ...(err.code ? { code: err.code } : {}),
   });
 };
 

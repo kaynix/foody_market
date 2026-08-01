@@ -132,3 +132,208 @@ a {
     left: 0;
   }
 }
+
+/* Seller workspace: a practical market ledger, separate from the storefront. */
+.seller-portal {
+  --seller-ink: #172038;
+  --seller-blue: #1746a2;
+  --seller-yellow: #f4b942;
+  --seller-green: #2f6b4f;
+  background: #f5f8ff;
+  color: var(--seller-ink);
+}
+
+.seller-portal__header {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem clamp(1rem, 4vw, 4rem);
+  background: var(--seller-ink);
+}
+
+.seller-portal__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.seller-portal__brand-mark {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.55rem 0.55rem 0.55rem 0.15rem;
+  background: var(--seller-yellow);
+  color: var(--seller-ink);
+}
+
+.seller-signin {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.75fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  align-items: center;
+  width: min(1120px, calc(100% - 2rem));
+  min-height: calc(100vh - 68px);
+  margin: 0 auto;
+  padding: 3rem 0;
+}
+
+.seller-signin__intro h1,
+.seller-workspace h1 {
+  max-width: 760px;
+  margin: 0.4rem 0 1.25rem;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: clamp(2.25rem, 5vw, 4.8rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.seller-signin__intro > p:not(.seller-kicker) {
+  max-width: 640px;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: color-mix(in srgb, var(--seller-ink) 68%, transparent);
+}
+
+.seller-kicker {
+  color: var(--seller-blue);
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.seller-route-line {
+  margin: 2.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seller-route-line li {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  min-height: 4.5rem;
+  color: #647087;
+}
+
+.seller-route-line li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 2rem;
+  bottom: 0;
+  left: 0.95rem;
+  width: 2px;
+  background: #cbd5e1;
+}
+
+.seller-route-line li > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  place-items: center;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  background: #f5f8ff;
+  font-family: ui-monospace, monospace;
+  font-weight: 800;
+}
+
+.seller-route-line .is-current { color: var(--seller-ink); }
+.seller-route-line .is-current > span { border-color: var(--seller-blue); color: var(--seller-blue); }
+.seller-route-line strong,
+.seller-route-line small { display: block; }
+.seller-route-line small { margin-top: 0.15rem; color: #718096; }
+
+.seller-signin__card {
+  position: relative;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid #d9e1ef;
+  border-radius: 1.25rem;
+  background: white;
+  box-shadow: 14px 14px 0 #dce6fa;
+}
+
+.seller-signin__card h2 {
+  margin-top: 0.85rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.seller-local-badge {
+  display: inline-flex;
+  border-radius: 999px;
+  background: var(--seller-yellow);
+  padding: 0.35rem 0.7rem;
+  color: #312405;
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.seller-diia-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.seller-diia-row strong,
+.seller-diia-row small { display: block; }
+.seller-diia-row small { color: #718096; }
+
+.seller-workspace {
+  width: min(1080px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 7rem) 0;
+}
+
+.seller-next-card {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 680px;
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  border-left: 5px solid var(--seller-green);
+  background: white;
+  box-shadow: 0 14px 40px rgb(23 32 56 / 8%);
+}
+
+.seller-next-card span { color: #647087; font-size: 0.85rem; }
+.seller-next-card strong { font-size: 1.15rem; }
+
+.seller-route-state {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: #f5f8ff;
+}
+
+@media (max-width: 800px) {
+  .seller-signin { grid-template-columns: 1fr; align-items: start; }
+  .seller-signin__card { box-shadow: 8px 8px 0 #dce6fa; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seller-portal *, .seller-portal *::before, .seller-portal *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

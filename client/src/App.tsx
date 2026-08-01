@@ -6,14 +6,22 @@ import HomePage from './pages/HomePage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CategoryPage from './pages/CategoryPage'
 import CartPage from './pages/CartPage'
+import SellerDashboardPage from './pages/seller/SellerDashboardPage'
+import SellerOnboardingPage from './pages/seller/SellerOnboardingPage'
+import SellerSignInPage from './pages/seller/SellerSignInPage'
 import { ThemeProvider } from './hooks/useTheme'
 
 function App() {
 
   return (
     <ThemeProvider>
-      <Layout>
-        <Switch>
+      <Switch>
+        <Route path="/seller/sign-in" component={SellerSignInPage} />
+        <Route path="/seller/onboarding" component={SellerOnboardingPage} />
+        <Route path="/seller" component={SellerDashboardPage} />
+        <Route>
+          <Layout>
+            <Switch>
           <Route path="/" component={HomePage} />
           <Route path="/category/:slug" component={CategoryPage} />
           <Route path="/product/:id" component={ProductDetailPage} />
@@ -26,8 +34,10 @@ function App() {
               </div>
             </div>
           </Route>
-        </Switch>
-      </Layout>
+            </Switch>
+          </Layout>
+        </Route>
+      </Switch>
     </ThemeProvider>
   )
 }

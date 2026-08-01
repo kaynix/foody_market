@@ -14,6 +14,8 @@ describe('parseEnv', () => {
     const config = parseEnv(baseEnv);
 
     expect(config.PORT).toBe(3001);
+    expect(config.SESSION_TTL_HOURS).toBe(720);
+    expect(config.IDENTITY_STATE_TTL_MINUTES).toBe(10);
     expect(config.STORAGE_DRIVER).toBe('local');
     expect(config.DEV_IDENTITY_ENABLED).toBe(false);
   });

@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange }) => {
         {/* Left: Logo */}
         <div className="flex-shrink-0">
           <h1 className="text-xl font-semibold text-base-content px-4 py-2 hover:bg-base-200 rounded-lg cursor-pointer">
-            Hutoryna market
+            {t('title')}
           </h1>
         </div>
         

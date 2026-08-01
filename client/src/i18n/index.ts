@@ -9,7 +9,7 @@ const resources = {
       home: "Home",
       products: "Products",
       category: "Category",
-      
+      title: "Hutorynok Market",
       // Categories
       categories: "Categories",
       allProducts: "All Products",
@@ -100,7 +100,7 @@ const resources = {
       home: "Головна",
       products: "Товари",
       category: "Категорія",
-      
+      title: "Хуторинок",
       // Categories
       categories: "Категорії",
       allProducts: "Всі товари",
